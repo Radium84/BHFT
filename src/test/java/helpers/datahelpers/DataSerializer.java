@@ -1,7 +1,7 @@
-package datahelpers;
+package helpers.datahelpers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import datahelpers.models.Todos;
+import helpers.datahelpers.models.Todos;
 
 public class DataSerializer {
     public static String createJson(Todos todos) {

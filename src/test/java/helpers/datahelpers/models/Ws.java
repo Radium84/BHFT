@@ -1,12 +1,14 @@
-package datahelpers.models;
+package helpers.datahelpers.models;
 
 public class Ws {
     private String type;
     private Todos data;
+
     public Ws(String type, Todos data) {
         this.type = type;
         this.data = data;
     }
+
     public Ws() {
 
     }

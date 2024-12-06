@@ -1,5 +1,4 @@
-package datahelpers.models;
-
+package helpers.datahelpers.models;
 
 
 public class Todos {
@@ -12,7 +11,8 @@ public class Todos {
         this.text = text;
         this.completed = completed;
     }
-    public Todos(){
+
+    public Todos() {
 
     }
 

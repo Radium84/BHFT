@@ -28,23 +28,23 @@ public class PerformanceTest {
             .withExposedPorts(Integer.valueOf(CONTAINER_PORT));
     @Test
     @DisplayName("Отправка N сообщений регулируемой длины")
-    void wsTest() throws Exception {
+    void loadTest() throws Exception {
         int mappedPort = todoAppContainer.getMappedPort(Integer.parseInt(CONTAINER_PORT));
         ApiHelper apiHelper = new ApiHelper();
-        String str = StringUtils.repeat("a", 100000);
-        apiHelper.loadPost("/todos", mappedPort, str,1000);
+        String str = StringUtils.repeat("a", 10);
+        apiHelper.loadPost("/todos", mappedPort, str,100000);
         String logs = todoAppContainer.getLogs();
         analyzeLogs(logs);
 
     }
     @Test
     @DisplayName("Многопоточка на базе ExecutorService")
-    void wsTestWithExecutorService() throws Exception {
+    void loadTestWithExecutorService() throws Exception {
         int mappedPort = todoAppContainer.getMappedPort(Integer.parseInt(CONTAINER_PORT));
         ApiHelper apiHelper = new ApiHelper();
-        String str = StringUtils.repeat("a", 10000);
-        int numThreads = 30;
-        int messagesPerThread = 100; // количество сообщений на поток
+        String str = StringUtils.repeat("a", 100);
+        int numThreads = 2;
+        int messagesPerThread = 10; // количество сообщений на поток
         ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
         for (int i = 0; i < numThreads; i++) {
             final int localMessagesPerThread = messagesPerThread;
@@ -65,11 +65,14 @@ public class PerformanceTest {
         analyzeLogs(logs);
 
     }
-
+    //разбор логов
     private void analyzeLogs(String logs) {
         List<LocalDateTime> timestamps = new ArrayList<>();
+        boolean redFlag = false;
+        String resultStatusCode = "201";
         String[] logLines = logs.split("n");
         Pattern timestampPattern = Pattern.compile("(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6})Z");
+        Pattern statusPattern = Pattern.compile("POST /todos HTTP/1\\.1\" (\\d{3})");
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
         // Извлекаем временные метки
         for (String line : logLines) {
@@ -78,21 +81,37 @@ public class PerformanceTest {
                 String timestamp = matcher.group(1);
                 timestamps.add(LocalDateTime.parse(timestamp, formatter));
             }
+            Matcher statusMatcher = statusPattern.matcher(line);
+            if (statusMatcher.find()) {
+                String statusCode = statusMatcher.group(1);
+                if (!statusCode.equals("201")) {
+                    resultStatusCode = statusCode;
+                    redFlag = true;
+                }
+            }
         }
 
-        if (timestamps.size() >= 2) {
-            LocalDateTime firstTimestamp = timestamps.get(0);
-            LocalDateTime lastTimestamp = timestamps.get(timestamps.size() - 1);
 
-            Duration duration = Duration.between(firstTimestamp, lastTimestamp);
+        if (timestamps.size()>= 2) {
+            LocalDateTime firstTimestampStart = timestamps.get(0);
+            LocalDateTime firstTimestampEnd = timestamps.get(1);
+            LocalDateTime lastTimestampEnd = timestamps.get(timestamps.size() - 1);
+            LocalDateTime lastTimestampStart = timestamps.get(timestamps.size() - 2);
 
+            Duration durationTotal = Duration.between(firstTimestampStart, lastTimestampEnd);
+            Duration firstPost = Duration.between(firstTimestampStart, firstTimestampEnd);
+            Duration lastPost = Duration.between(lastTimestampStart, lastTimestampEnd);
             System.out.println("Анализ производительности:");
-            System.out.println("Время начала: " + firstTimestamp);
-            System.out.println("Время окончания: " + lastTimestamp);
-            System.out.println("Общая продолжительность: " + duration.toMillis() + " мс");
+            System.out.println("Время начала: " + firstTimestampStart);
+            System.out.println("Время окончания: " + lastTimestampEnd);
+            System.out.println(String.format("Статус наличия ошибок: %s, код обработки %s",redFlag, resultStatusCode));
+            System.out.println("Общая продолжительность: " + durationTotal.toMillis() + " мс");
             System.out.println("Количество обработанных запросов: " + timestamps.size());
             System.out.println("Среднее время на запрос: " +
-                    (duration.toMillis() / (double)timestamps.size()) + " мс");
+                    (durationTotal.toMillis() / (double)timestamps.size()) + " мс");
+            System.out.println("Время обработки в начале отправки: " + firstPost.toMillis() + " мс");
+            System.out.println("Время обработки в конце отправки: " + lastPost.toMillis() + " мс");
+
         } else {
             System.out.println("Недостаточно данных в логах для анализа");
         }

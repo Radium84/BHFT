@@ -1,4 +1,4 @@
-package httpconnection;
+package helpers.httpconnection;
 
 import java.net.http.WebSocket;
 import java.util.concurrent.CompletableFuture;
@@ -6,6 +6,7 @@ import java.util.concurrent.CompletionStage;
 
 public class WebSocketListener implements WebSocket.Listener {
     private CompletableFuture<String> messageFuture = new CompletableFuture<>();
+
     @Override
     public void onOpen(WebSocket webSocket) {
         webSocket.request(1);

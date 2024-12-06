@@ -1,7 +1,7 @@
-package httpconnection;
+package helpers.httpconnection;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import datahelpers.models.Todos;
+import helpers.datahelpers.models.Todos;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.MalformedURLException;
@@ -13,12 +13,14 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 
+import static helpers.datahelpers.DataSerializer.createJson;
 import static helpers.common.TestValues.*;
 
 public class ApiHelper {
 
     private final HttpClient httpClient;
-    public ApiHelper()  {
+
+    public ApiHelper() {
         this.httpClient = HttpClient.newHttpClient();
     }
 
@@ -35,6 +37,7 @@ public class ApiHelper {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         return response;
     }
+
     public List<Todos> getTodos(String endpoint, int port) throws Exception {
 
         URI uri = getUri(endpoint, port);
@@ -50,6 +53,14 @@ public class ApiHelper {
                 response.body(),
                 objectMapper.getTypeFactory().constructCollectionType(List.class, Todos.class)
         );
+    }
+
+    public void loadPost(String endpoint, int port, String text, int count) throws Exception {
+        for(int i =1; i<count;i++){
+            Todos todos = new Todos((long) i,text, true);
+            String body = createJson(todos);
+        createTodos(body,endpoint,port);
+        }
     }
 
     private static @NotNull URI getUri(String endpoint, int port) throws MalformedURLException, URISyntaxException {
