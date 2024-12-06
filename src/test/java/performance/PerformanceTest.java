@@ -1,5 +1,6 @@
 package performance;
 
+import helpers.common.TestValues;
 import helpers.httpconnection.ApiHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.DisplayName;
@@ -22,10 +23,7 @@ import java.util.regex.Pattern;
 import static helpers.common.TestValues.CONTAINER_PORT;
 
 @Testcontainers
-public class PerformanceTest {
-    @Container
-    private GenericContainer<?> todoAppContainer = new GenericContainer<>("todo-app")
-            .withExposedPorts(Integer.valueOf(CONTAINER_PORT));
+public class PerformanceTest extends TestValues {
     @Test
     @DisplayName("Отправка N сообщений регулируемой длины")
     void loadTest() throws Exception {

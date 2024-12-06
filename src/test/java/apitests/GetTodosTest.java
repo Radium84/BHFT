@@ -1,11 +1,9 @@
 package apitests;
 
-import helpers.httpconnection.ApiHelper;
 import helpers.common.TestValues;
-import io.restassured.RestAssured;
-import org.junit.jupiter.api.*;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.junit.jupiter.Container;
+import helpers.httpconnection.ApiHelper;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static io.restassured.RestAssured.given;
@@ -23,16 +21,6 @@ import static org.hamcrest.Matchers.*;
  */
 @Testcontainers
 public class GetTodosTest extends TestValues {
-
-    @Container
-    private GenericContainer<?> todoAppContainer = new GenericContainer<>("todo-app")
-            .withExposedPorts(Integer.valueOf(CONTAINER_PORT));
-
-    @BeforeAll
-    static void setUp() {
-        RestAssured.baseURI = TODOS_URL;
-    }
-
     @Test
     @DisplayName("Получение списка TODOS без квери, валидация полей")
     void clearGetTest() throws Exception {

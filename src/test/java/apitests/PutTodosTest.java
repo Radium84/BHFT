@@ -3,15 +3,11 @@ package apitests;
 import helpers.common.TestValues;
 import helpers.datahelpers.models.Todos;
 import helpers.httpconnection.ApiHelper;
-import io.restassured.RestAssured;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
@@ -30,13 +26,11 @@ import static org.junit.jupiter.api.Assertions.assertAll;
  */
 @Testcontainers
 public class PutTodosTest extends TestValues {
-    @Container
-    private GenericContainer<?> todoAppContainer = new GenericContainer<>("todo-app")
-            .withExposedPorts(Integer.valueOf(CONTAINER_PORT));
-
-    @BeforeAll
-    static void setUp() {
-        RestAssured.baseURI = TODOS_URL;
+    static Stream<Arguments> provideJsonProcessingParams() {
+        return Stream.of(
+                Arguments.of(new Todos(0L, "Task 2", false)),
+                Arguments.of(new Todos(2L, "", true))
+        );
     }
 
     @Test
@@ -129,13 +123,6 @@ public class PutTodosTest extends TestValues {
                 .put("/todos/{id}", 1)
                 .then()
                 .statusCode(200);
-    }
-
-    static Stream<Arguments> provideJsonProcessingParams() {
-        return Stream.of(
-                Arguments.of(new Todos(0L, "Task 2", false)),
-                Arguments.of(new Todos(2L, "", true))
-        );
     }
 
 

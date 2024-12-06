@@ -1,17 +1,13 @@
 package apitests;
 
-import helpers.httpconnection.ApiHelper;
 import helpers.common.TestValues;
-import io.restassured.RestAssured;
+import helpers.httpconnection.ApiHelper;
 import io.restassured.specification.RequestSpecification;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.stream.Stream;
@@ -28,13 +24,13 @@ import static org.hamcrest.Matchers.is;
  */
 @Testcontainers
 public class DeleteTodosTest extends TestValues {
-    @Container
-    private GenericContainer<?> todoAppContainer = new GenericContainer<>("todo-app")
-            .withExposedPorts(Integer.valueOf(CONTAINER_PORT));
 
-    @BeforeAll
-    static void setUp() {
-        RestAssured.baseURI = TODOS_URL;
+    private static Stream<Arguments> provideAuthTestData() {
+        return Stream.of(
+                Arguments.of(null, null, 401),
+                Arguments.of("wrongAdmin", "admin", 401),
+                Arguments.of("admin", "wrongPassword", 401)
+        );
     }
 
     @Test
@@ -104,14 +100,5 @@ public class DeleteTodosTest extends TestValues {
                 .then()
                 .statusCode(200)
                 .body("size()", is(1));
-    }
-
-
-    private static Stream<Arguments> provideAuthTestData() {
-        return Stream.of(
-                Arguments.of(null, null, 401),
-                Arguments.of("wrongAdmin", "admin", 401),
-                Arguments.of("admin", "wrongPassword", 401)
-        );
     }
 }

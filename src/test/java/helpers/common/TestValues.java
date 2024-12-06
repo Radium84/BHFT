@@ -1,6 +1,10 @@
 package helpers.common;
 
 import helpers.datahelpers.TestValuesCalculate;
+import io.restassured.RestAssured;
+import org.junit.jupiter.api.BeforeAll;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
 
 public class TestValues extends TestValuesCalculate {
 
@@ -18,5 +22,13 @@ public class TestValues extends TestValuesCalculate {
     public static String updatedBody;
     public static String notCompletedJson;
 
+    @Container
+    protected GenericContainer<?> todoAppContainer = new GenericContainer<>("todo-app")
+            .withExposedPorts(Integer.valueOf(CONTAINER_PORT));
 
+
+    @BeforeAll
+    public static void setUp() {
+        RestAssured.baseURI = TODOS_URL;
+    }
 }

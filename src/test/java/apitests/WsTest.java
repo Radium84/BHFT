@@ -9,8 +9,6 @@ import helpers.httpconnection.ApiHelper;
 import helpers.httpconnection.WebSocketListener;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.net.URI;
@@ -20,13 +18,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @Testcontainers
 public class WsTest extends TestValues {
-    @Container
-    private GenericContainer<?> todoAppContainer = new GenericContainer<>("todo-app")
-            .withExposedPorts(Integer.valueOf(CONTAINER_PORT));
 
     @Test
     @DisplayName("Проверка обновления по WS")
